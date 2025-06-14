@@ -30,6 +30,30 @@
   <p>Don’t have an account? <a href="#" onclick="switchView('signup')">Create Admin</a></p>
 </div>
 
+<!-- Map Locator-->
+<section id="mapSection" style="margin-top: 20px;">
+  <h2>Select Property Location (No Login Required)</h2>
+
+  <label for="propertyName">Property Name</label>
+  <input type="text" id="propertyName" placeholder="e.g. Plot 3, Sangotedo Estate">
+
+  <label for="address">Address</label>
+  <input type="text" id="address" placeholder="Enter address">
+
+  <button onclick="geocodeAddress()">Find on Map</button>
+
+  <div id="map" style="height: 400px; margin: 15px 0;"></div>
+
+  <label>Latitude</label>
+  <input type="text" id="lat" readonly>
+  <label>Longitude</label>
+  <input type="text" id="lng" readonly>
+
+  <button onclick="submitGuestLocation()">Submit Property Location</button>
+</section>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBI7tc5tLtVbHe4nWdz62R2RogYe4fI6JU&libraries=places"></script>
+
 <!-- Signup -->
 <div id="signup" class="section">
   <h2>Create Admin Account</h2>
@@ -207,6 +231,82 @@
       tbody.innerHTML += `<tr><td>${p.propertyName}</td><td>${p.propertyType}</td><td>${p.address || '-'}</td><td>${p.latitude}</td><td>${p.longitude}</td><td>${p.documentUrl ? `<a href='${p.documentUrl}' target='_blank'>View</a>` : '-'}</td></tr>`;
     });
   }
+
+  let map, marker, geocoder;
+
+  function initMap() {
+    geocoder = new google.maps.Geocoder();
+    const defaultPos = { lat: 6.5244, lng: 3.3792 };
+
+    map = new google.maps.Map(document.getElementById("map"), {
+      zoom: 12,
+      center: defaultPos
+    });
+
+    marker = new google.maps.Marker({
+      position: defaultPos,
+      map: map,
+      draggable: true
+    });
+
+    marker.addListener("dragend", () => {
+      const pos = marker.getPosition();
+      updateLatLng(pos);
+      reverseGeocode(pos);
+    });
+  }
+
+  function updateLatLng(pos) {
+    document.getElementById('lat').value = pos.lat();
+    document.getElementById('lng').value = pos.lng();
+  }
+
+  function geocodeAddress() {
+    const address = document.getElementById('address').value;
+    geocoder.geocode({ address }, (results, status) => {
+      if (status === 'OK') {
+        const location = results[0].geometry.location;
+        map.setCenter(location);
+        marker.setPosition(location);
+        updateLatLng(location);
+      } else {
+        alert('Geocode failed: ' + status);
+      }
+    });
+  }
+
+  function reverseGeocode(latlng) {
+    geocoder.geocode({ location: latlng }, (results, status) => {
+      if (status === 'OK' && results[0]) {
+        document.getElementById('address').value = results[0].formatted_address;
+      }
+    });
+  }
+
+  function submitGuestLocation() {
+    const payload = {
+      propertyName: document.getElementById('propertyName').value,
+      address: document.getElementById('address').value,
+      latitude: parseFloat(document.getElementById('lat').value),
+      longitude: parseFloat(document.getElementById('lng').value)
+    };
+
+    fetch('/api/guest-location', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        alert("Location submitted successfully!");
+      } else {
+        alert("Submission failed.");
+      }
+    });
+  }
+
+  window.onload = initMap;
 </script>
 </body>
 </html>
