@@ -27,6 +27,18 @@
   <input id="password" type="password" placeholder="Password" />
   <button onclick="login()">Login</button>
   <p id="loginMsg" class="error"></p>
+  <p>Don’t have an account? <a href="#" onclick="switchView('signup')">Create Admin</a></p>
+</div>
+
+<!-- Signup -->
+<div id="signup" class="section">
+  <h2>Create Admin Account</h2>
+  <input id="newUsername" placeholder="Username" />
+  <input id="newPassword" type="password" placeholder="Password" />
+  <button onclick="registerUser()">Register</button>
+  <button onclick="switchView('loginSection')">Back to Login</button>
+  <p id="signupMsg" class="error"></p>
+  <button onclick="switchView('loginSection')">Back to Login</button>
 </div>
 
 <!-- Navigation -->
@@ -47,6 +59,9 @@
   <input id="docUpload" type="file" />
   <input id="documentUrl" placeholder="Document URL (if no file)" />
   <button onclick="submitProperty()">Submit</button>
+  <button onclick="switchView('dashboard')">Back to Dashboard</button>
+  <!-- <button onclick="switchView('dashboard')">Return Home</button> -->
+  <button onclick="logout()">Logout</button>
   <p id="formMsg"></p>
 </div>
 
@@ -54,6 +69,8 @@
 <div id="dashboard" class="section">
   <h2>All Properties</h2>
   <button onclick="loadProperties()">Refresh</button>
+  <button onclick="switchView('register')">Back to Register</button>
+  <button onclick="logout()">Logout</button>
   <table>
     <thead>
       <tr><th>Name</th><th>Type</th><th>Address</th><th>Lat</th><th>Long</th><th>Document</th></tr>
@@ -71,8 +88,8 @@
     if (view === 'dashboard') loadProperties();
   }
 
-  async function login() {
-    const res = await fetch("http://<EC2_PUBLIC_IP>:4000/api/auth/login", {
+  window.login = async function () {
+    const res = await fetch("https://dtqw9szt1eom5.cloudfront.net/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -83,4 +100,51 @@
     const data = await res.json();
     if (data.token && data.role === 'admin') {
       token = data.token;
-      document.getElementB
+      document.getElementById("loginSection").style.display = "none";
+      document.getElementById("navBar").classList.add("active");
+      document.getElementById("register").classList.add("active");
+    } else {
+      document.getElementById("loginMsg").innerText = "Invalid credentials";
+    }
+  }
+
+  window.registerUser = async function () {
+    const username = document.getElementById("newUsername").value;
+    const password = document.getElementById("newPassword").value;
+    const msg = document.getElementById("signupMsg");
+
+    if (!username || !password) {
+      msg.textContent = "Username and password are required.";
+      return;
+    }
+
+    try {
+      const res = await fetch("https://dtqw9szt1eom5.cloudfront.net/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password, role: "admin" })
+      });
+      const data = await res.json();
+      if (data.id) {
+        msg.className = "success";
+        msg.textContent = "Admin created! Redirecting to login...";
+        setTimeout(() => switchView('loginSection'), 1500);
+      } else {
+        msg.className = "error";
+        msg.textContent = data.error || "Registration failed.";
+      }
+    } catch (err) {
+      msg.textContent = "Server error.";
+    }
+  }
+
+  function logout() {
+    token = "";
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById("loginSection").classList.add("active");
+    document.getElementById("navBar").classList.remove("active");
+  }
+
+
+  window.submitProperty = async function () {
+    const name = document.getElementById("prop
