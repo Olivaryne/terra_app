@@ -1,0 +1,13 @@
+body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+nav { background: #007bff; color: white; padding: 12px; text-align: center; }
+nav button { background: white; color: #007bff; border: none; padding: 10px 20px; margin: 0 6px; cursor: pointer; }
+.section { display: none; padding: 20px; }
+.active { display: block; }
+input, select, button, textarea { width: 100%; padding: 8px; margin: 6px 0; }
+table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+th { background-color: #f4f4f4; }
+.error { color: red; }
+.success { color: green; }
+.row-guest { background-color: #fff0f0; }
+.row-admin { background-color: #f0f8ff; }

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>TerraSure Admin Panel</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- Login -->
+<div id="loginSection" class="section active">
+    <h2>Admin Login</h2>
+    <input id="username" placeholder="Username" />
+    <input id="password" type="password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+    <p id="loginMsg" class="error"></p>
+    <p>Don’t have an account? <a href="#" onclick="switchView('signup')">Create Admin</a></p>
+</div>
+
+<!-- Signup -->
+<div id="signup" class="section">
+    <h2>Create Account</h2>
+    <form id="registerForm">
+        <label>Email</label>
+        <input type="email" id="regEmail" required>
+        <label>Password</label>
+        <input type="password" id="regPassword" required>
+        <button type="submit">Create Account</button>
+    </form>
+    <p id="regStatus" class="error"></p>
+</div>
+
+<!-- Navigation -->
+<nav id="navBar" class="section">
+    <button onclick="switchView('register')">Register Property</button>
+    <button onclick="switchView('dashboard')">Dashboard</button>
+    <button onclick="switchView('mapSection')">Set Property Location</button>
+    <button onclick="logout()">Logout</button>
+</nav>
+
+
+<!-- Register Property -->
+    <div id="register" class="section">
+    <h2>Register Property</h2>
+    <input id="propertyName" placeholder="Property Name" />
+    <input id="propertyType" placeholder="Property Type (e.g., residential)" />
+    <input id="address" placeholder="Address" />
+    <input id="latitude" type="number" step="any" placeholder="Latitude" />
+    <input id="longitude" type="number" step="any" placeholder="Longitude" />
+    <input id="docUpload" type="file" />
+    <input id="documentUrl" placeholder="Document URL (if no file)" />
+    <button onclick="submitProperty()">Submit</button>
+    <button onclick="switchView('dashboard')">Back to Dashboard</button>
+    <button onclick="logout()">Logout</button>
+    <p id="formMsg"></p>
+</div>
+
+<!-- Guest Location Map -->
+<section id="mapSection" class="section">
+    <h2>Select Property Location (No Login Required)</h2>
+    <label for="propertyName">Property Name</label>
+    <input type="text" id="guestPropertyName" placeholder="e.g. Plot 3, Sangotedo Estate">
+    <label for="address">Address</label>
+    <input type="text" id="guestAddress" placeholder="Enter address">
+    <button onclick="geocodeAddress()">Find on Map</button>
+    <div id="map" style="height: 400px; margin: 15px 0;"></div>
+    <label>Latitude</label>
+    <input type="text" id="lat" readonly>
+    <label>Longitude</label>
+    <input type="text" id="lng" readonly>
+    <button onclick="submitGuestLocation()">Submit Property Location</button>
+</section>
+
+<!-- Dashboard -->
+<div id="dashboard" class="section">
+    <h2>All Properties</h2>
+    <button onclick="loadProperties()">Refresh</button>
+    <button onclick="switchView('register')">Back to Register</button>
+    <button onclick="logout()">Logout</button>
+    <div id="dashboardContent"></div>
+</div>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBI7tc5tLtVbHe4nWdz62R2RogYe4fI6JU&libraries=places"></script>
+<script src="main.js"></script>
+</body>
+</html>
