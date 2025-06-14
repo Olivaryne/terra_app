@@ -147,4 +147,62 @@
 
 
   window.submitProperty = async function () {
-    const name = document.getElementById("prop
+    const name = document.getElementById("propertyName").value.trim();
+    const type = document.getElementById("propertyType").value.trim();
+    const address = document.getElementById("address").value.trim();
+    const lat = document.getElementById("latitude").value;
+    const lng = document.getElementById("longitude").value;
+    const file = document.getElementById("docUpload").files[0];
+    const fallbackUrl = document.getElementById("documentUrl").value.trim();
+    const msg = document.getElementById("formMsg");
+
+    if (file && file.size > 15 * 1024 * 1024) {
+      msg.className = "error";
+      msg.textContent = "File too large. Max size is 15MB.";
+      return;
+    }
+
+    if (!name || !type || !lat || !lng) {
+      msg.className = "error";
+      msg.textContent = "All required fields must be filled.";
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("propertyName", name);
+    formData.append("propertyType", type);
+    formData.append("address", address);
+    formData.append("latitude", lat);
+    formData.append("longitude", lng);
+    if (file) formData.append("document", file);
+    else if (fallbackUrl) formData.append("documentUrl", fallbackUrl);
+
+    try {
+      const res = await fetch("https://dtqw9szt1eom5.cloudfront.net/api/properties", {
+        method: "POST",
+        headers: { Authorization: "Bearer " + token },
+        body: formData
+      });
+      const data = await res.json();
+      msg.className = data.id ? "success" : "error";
+      msg.textContent = data.id ? "Property registered!" : `Failed: ${data.error || "Unknown error"}`;
+    } catch (err) {
+      msg.className = "error";
+      msg.textContent = "Server error.";
+    }
+  }
+
+  async function loadProperties() {
+    const res = await fetch("https://dtqw9szt1eom5.cloudfront.net/api/properties", {
+      headers: { Authorization: "Bearer " + token }
+    });
+    const data = await res.json();
+    const tbody = document.getElementById("propertyTable");
+    tbody.innerHTML = "";
+    data.data.forEach(p => {
+      tbody.innerHTML += `<tr><td>${p.propertyName}</td><td>${p.propertyType}</td><td>${p.address || '-'}</td><td>${p.latitude}</td><td>${p.longitude}</td><td>${p.documentUrl ? `<a href='${p.documentUrl}' target='_blank'>View</a>` : '-'}</td></tr>`;
+    });
+  }
+</script>
+</body>
+</html>
